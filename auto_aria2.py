@@ -73,6 +73,9 @@ class auto_aria2(object):
             print('$>: 最新版本： %s, 无须更新' % version)
             return
 
+        if self.is_running():
+            self.stop()
+
         url = host + re.search(pattern, content.decode('utf-8')).group()
         if url.__eq__(host):
             return 
@@ -91,7 +94,7 @@ class auto_aria2(object):
                     break
         os.remove(temp)
 
-    def get_b_trackers(self):
+    def get_bt_trackers(self):
         url = 'https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_best.txt'
         return requests.get(url).text.replace("\n", ';').replace(";;", ';')
 
@@ -126,7 +129,7 @@ class auto_aria2(object):
         content = self.upd_by_key_value(content, 'dir', self.download)
         content = self.upd_by_key_value(content, 'input-file', self.session)
         content = self.upd_by_key_value(content, 'save-session', self.session)
-        content = self.upd_by_key_value(content, 'bt-tracker', self.get_b_trackers())
+        content = self.upd_by_key_value(content, 'bt-tracker', self.get_bt_trackers())
 
         with open(self.config, 'w', encoding='utf-8') as f:
             f.writelines(content)
@@ -151,10 +154,10 @@ class auto_aria2(object):
 
     def version(self):
         if self.curr_version:
-            return self.curr_version
-
+            version = self.curr_version
         # 简单粗暴
-        version = os.popen(self.process + ' -v').read().split('\n')[0].split(' ')[2]
+        else:
+            version = os.popen(self.process + ' -v').read().split('\n')[0].split(' ')[2]
         print('$>: 当前aria2版本为 ', version)
         return version
         # 通过rpc接口
@@ -188,4 +191,12 @@ class auto_aria2(object):
         self.stop()
         self.run()
 
+    def update_configs(self):
+        content = ''
+        with open(self.config, 'r', encoding='utf8') as file:
+            content = file.readlines()
+            file.close()
+        self.upd_config(content)
+        self.restart()
+    
     pass

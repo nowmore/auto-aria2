@@ -21,7 +21,7 @@ if __name__ == "__main__":
     while True:
         cmd = input('$>: ')
         pos = cmd.find(' ')
-        c = cmd if pos == -1 else cmd[:pos]
+        c = cmd.upper() if pos == -1 else cmd[:pos].upper()
 
         try:
             if not obj.is_running():
@@ -32,7 +32,7 @@ if __name__ == "__main__":
                 break
             elif c in ['P', 'PAUSE']:
                 obj.pause()
-            elif c in ['SAVE']:
+            elif c == 'SAVE':
                 obj.save()
             elif c in ['START', 'CONTINUE']:
                 obj.start()
@@ -46,6 +46,8 @@ if __name__ == "__main__":
                     print('$>: A[DD] url/torrent')
                     continue
                 obj.add_task(cmd[pos + 1:])
+            elif c in ['UC', 'UPDATE_CONFIG']:
+                obj.update_configs()
             else:
                 print('''
 $>: EXIT, QUIT, Q   停止aria2, 退出
@@ -57,7 +59,9 @@ $>: EXIT, QUIT, Q   停止aria2, 退出
     A, ADD url      添加下载任务
     ''')
         except KeyboardInterrupt:
-            obj.stop()
+            c = input('$>: 是否停止aria2? yes/no')
+            if c.upper() in ['Y', 'YES']:
+                obj.stop()
             break
         except Exception:
             traceback.print_exc()
