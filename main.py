@@ -1,73 +1,27 @@
-"""
-windows aria2自动下载，配置脚本
-aria2路径：C:\\Users\\your_user_name\\aria2
-aria2.exe, aria2.conf, session均在此目录
-aria2的下载路径：C:\\Users\your_user_name\\Downloads
-"""
-# -*- coding:utf-8 -*-
-try:
-    from auto_aria2 import auto_aria2
-except ModuleNotFoundError:
-    print('requires not found! now we going to setup from you')
-    import os
-    os.popen('pip install requests')
-    pass
 
-import traceback
+"""
+暂时只做启动功能
+"""
+from aria2Util import util
+from env import env
+import msg
+import logging, logging.config
+from defaultConfig import logConf
+import sys
+
 if __name__ == "__main__":
+    logging.config.dictConfig(logConf)
+    logging.info('process running')
+    if (len(sys.argv) == 1 or sys.argv[1] == 'setup'):
+        for a in sys.argv:
+            logging.info(a)
+        env.setup()
+        sys.exit(0)
 
-    obj = auto_aria2()
-    obj.run()
-    while True:
-        cmd = input('$>: ')
-        pos = cmd.find(' ')
-        c = cmd.upper() if pos == -1 else cmd[:pos].upper()
-
-        try:
-            if not obj.is_running():
-                obj.run()
-            if c in ['EXIT', 'QUIT', 'Q'] :
-                print('$>: bye!')
-                obj.stop()
-                break
-            elif c in ['P', 'PAUSE']:
-                obj.pause()
-            elif c == 'SAVE':
-                obj.save()
-            elif c in ['START', 'CONTINUE']:
-                obj.start()
-            elif c in ['V', 'VERSION']:
-                obj.version()
-            elif c in ['U', 'UPDATE']:
-                obj.update()
-            elif c in ['A', 'ADD']:
-                if pos == -1:
-                    print('$>: 请输入要下载的url或者种子文件路径')
-                    print('$>: A[DD] url/torrent')
-                    continue
-                obj.add_task(cmd[pos + 1:])
-            elif c in ['UC', 'UPDATE_CONFIG']:
-                obj.update_configs()
-            else:
-                print('''
-$>: EXIT, QUIT, Q   停止aria2, 退出
-    P, PAUSE        暂停下载
-    SAVE            保存下载进度
-    START           开始/继续下载
-    V, VERSION      查看aria2版本
-    U, UPDATE       检查更新
-    A, ADD url      添加下载任务
-    ''')
-        except KeyboardInterrupt:
-            c = input('$>: 是否停止aria2? yes/no')
-            if c.upper() in ['Y', 'YES']:
-                obj.stop()
-            break
-        except Exception:
-            traceback.print_exc()
-            print('未知错误')
-        
-
-
-        
-        
+    env.setup()
+    data = msg.recevice()
+    msg.send('{"returnCoe":"0"}')
+    logging.info(data)
+    util.run()
+    util.addTask(data.params)
+    pass
